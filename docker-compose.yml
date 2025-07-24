@@ -1,0 +1,72 @@
+volumes:
+  mysql-store-81:
+  redis-store-72:
+
+services:
+  nginx-php-fpm-8.2:
+    container_name: nginx-php-fpm-82
+    build:
+      context: .
+      dockerfile: ./nginx-php-fpm-82/Dockerfile
+    ports:
+      - 8009:8009
+      - 8010:8010
+      - 8014:8014
+      - 8015:8015
+      - 8080:8080
+    volumes:
+      - ./nginx-php-fpm-82/tpl.d:/etc/nginx/tpl.d
+      - ./nginx-php-fpm-82/general.conf:/etc/nginx/general.conf
+      - ./nginx-php-fpm-82/nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+    depends_on:
+      - mysql-81
+      - redis-72
+    networks:
+      - backend
+
+  mysql-81:
+    container_name: mysql-81
+    build:
+      context: .
+      dockerfile: ./mysql-81/Dockerfile
+    ports:
+      - 3306:3306
+    volumes:
+      - type: volume
+        source: mysql-store-81
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
+    environment:
+      MYSQL_ROOT_PASSWORD: Arisvn1369!
+      MYSQL_DATABASE: gencode_db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  redis-72:
+    container_name: redis-72
+    build:
+      context: .
+      dockerfile: ./redis-72/Dockerfile
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-store-72:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+      
+networks:
+  backend:
+    driver: bridge
