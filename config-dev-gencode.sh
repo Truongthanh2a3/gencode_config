@@ -1,0 +1,34 @@
+#!/bin/bash
+
+echo "Pull commit"
+cd /home/max/gencode/dev_docker_gencode/source/VMS_GENCODE
+git checkout develop
+git pull origin develop
+
+cd /home/max/gencode/dev_docker_gencode
+echo "🧼 Removing old container (if exists)..."
+docker compose rm -sf nginx-php-fpm-8.2
+
+echo "🚧 Rebuilding nginx-php-fpm-8.2 without cache..."
+docker compose build --no-cache nginx-php-fpm-8.2
+
+echo "🚀 Recreating container..."
+docker compose up -d --no-deps --force-recreate nginx-php-fpm-8.2
+
+echo "✅ Done!"
+
+echo " Running Lavarel setup inside container: dev-nginx-php-fpm-82"
+
+# docker exec -it dev-nginx-php-fpm-82 bash -c "
+#     cd /var/www/html && \ 
+#     php artisan migrate:fresh --seed
+#     "
+docker exec -it dev-nginx-php-fpm-82 bash -c "
+    php artisan config:clear && \
+    php artisan route:clear && \
+    php artisan view:clear && \
+    php artisan config:cache && \
+    npm install && npm run build
+    "
+echo " Lavarel setup completed!"
+    
