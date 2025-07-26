@@ -19,16 +19,17 @@ echo "✅ Done!"
 
 echo " Running Lavarel setup inside container: dev-nginx-php-fpm-82"
 
-# docker exec -it dev-nginx-php-fpm-82 bash -c "
-#     cd /var/www/html && \ 
-#     php artisan migrate:fresh --seed
-#     "
+docker exec -it dev-nginx-php-fpm-82 bash -c "
+    cd /var/www/html && \ 
+    php artisan migrate:fresh --seed
+    "
 docker exec -it dev-nginx-php-fpm-82 bash -c "
     php artisan config:clear && \
     php artisan route:clear && \
     php artisan view:clear && \
     php artisan config:cache && \
-    npm install && npm run build
+    npm install && npm run build && \
+    composer require laravel/reverb maatwebsite/excel phpoffice/phpspreadsheet:^1.28 --with-all-dependencies
     "
 echo " Lavarel setup completed!"
     
