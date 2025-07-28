@@ -2,8 +2,8 @@
 
 echo "Pull commit"
 cd /home/max/gencode/docker_gencode/source/VMS_GENCODE
-git checkout develop
-git pull origin develop
+git checkout master
+git pull origin master
 
 cd /home/max/gencode/docker_gencode
 echo "🧼 Removing old container (if exists)..."
