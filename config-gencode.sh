@@ -19,10 +19,10 @@ echo "✅ Done!"
 
 echo " Running Lavarel setup inside container: nginx-php-fpm-82"
 
-# docker exec -it nginx-php-fpm-82 bash -c "
-#     cd /var/www/html && \ 
-#     php artisan migrate:fresh --seed
-#     "
+ docker exec -it nginx-php-fpm-82 bash -c "
+     cd /var/www/html && \ 
+     php artisan migrate:fresh --seed
+     "
 docker exec -it nginx-php-fpm-82 bash -c "
     php artisan config:clear && \
     php artisan route:clear && \

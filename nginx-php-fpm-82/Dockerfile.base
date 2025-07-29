@@ -1,0 +1,71 @@
+# ./nginx-php-fpm-82/Dockerfile.base
+FROM php:8.2-fpm
+
+# Cài các gói system & extension
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    openssh-client \
+    nginx \
+    git \
+    unzip \
+    curl \
+    zip \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libxml2-dev \
+    libzip-dev \
+    libonig-dev \
+    libicu-dev \
+    libldap2-dev \
+    libxslt-dev \
+    libmariadb-dev \
+    libmariadb-dev-compat \
+    libcurl4-openssl-dev \
+    libmagickwand-dev \
+    gettext-base \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
+# PHP extension
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install -j$(nproc) \
+        bcmath calendar ctype curl dom exif fileinfo gd iconv intl \
+        mbstring mysqli opcache pdo pdo_mysql gettext phar sockets xsl zip ldap soap
+
+RUN pecl install redis imagick && docker-php-ext-enable redis imagick
+
+# Tạo thư mục cần thiết
+RUN mkdir -p /etc/nginx/conf.d /run/php /var/www/html && \
+    mkdir -p /root/.ssh && \
+    chown -R www-data:www-data /var/www 
+
+# Add deploy key (PRIVATE) để clone
+COPY ./deploy_gencode_key /root/.ssh/id_rsa
+RUN chmod 600 /root/.ssh/id_rsa && \
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+# Clone vào thư mục tạm, rồi copy vào /var/www/html
+RUN git clone git@github.com:Truongthanh2a3/gencode_config.git /tmp/gencode && \
+    cp -r /tmp/gencode/. /var/www/html && \
+    rm -rf /tmp/gencode
+
+# Xoá SSH key sau khi clone để tránh lộ trong image
+RUN rm /root/.ssh/id_rsa
+
+# Copy cấu hình nginx + php-fpm mặc định (nếu có)
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./www.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Mặc định workdir
+WORKDIR /var/www/html
+
+# Expose các cổng Nginx (nếu dùng default.conf)
+EXPOSE 8009 8010 8014 8015
+
+# Entrypoint
+CMD bash -c "mkdir -p /run/php && nginx -g 'daemon off;' && php-fpm"

@@ -1,4 +1,4 @@
-FROM truongthanh2a3/gencode:gencode-base-1.0
+FROM truongthanh2a3/gencode-base:2.0
 
 # Copy code Laravel
 COPY ./source/VMS_GENCODE /var/www/html

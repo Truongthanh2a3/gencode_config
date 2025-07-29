@@ -3,6 +3,16 @@ pipeline {
         label 'report'
     }
     stages {
+        stage('Commit container to iamges'){
+            steps{
+                script{
+                    sh '''
+                    docker commit nginx-php-fpm-82 nginx-php-fm-82
+                    docker push 
+                    '''
+                }
+            }
+        }
         stage('Trigger Check') {
             when {
                 expression {
