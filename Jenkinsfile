@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        cd /home/max/gencode/devops_docker_gencode
+                        cd /home/max/gencode/dev_docker_gencode
                         ./pull-config.sh
                     '''                    
                 }

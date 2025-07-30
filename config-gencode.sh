@@ -1,11 +1,11 @@
 #!/bin/bash
 
 echo "Pull commit"
-cd /home/max/gencode/devops_docker_gencode/source/VMS_GENCODE
+cd /home/max/gencode/dev_docker_gencode/source/VMS_GENCODE
 git checkout develop
 git pull origin develop
 
-cd /home/max/gencode/devops_docker_gencode
+cd /home/max/gencode/dev_docker_gencode
 echo "🧼 Removing old container (if exists)..."
 docker compose rm -sf nginx-php-fpm-8.2
 
