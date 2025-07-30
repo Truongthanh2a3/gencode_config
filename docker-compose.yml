@@ -1,19 +1,19 @@
 volumes:
-  devops-mysql-store-81:
-  devops-redis-store-72:
+  mysql-store-81:
+  redis-store-72:
 
 services:
   nginx-php-fpm-8.2:
-    container_name: devops-nginx-php-fpm-82
+    container_name: ${CONTAINER_NAME}
     build:
       context: .
       dockerfile: ./nginx-php-fpm-82/Dockerfile
     ports:
-      - 2009:8009
-      - 2010:8010
-      - 2014:8014
-      - 2015:8015
-      - 2080:8080
+      - ${NGINX_PORT_1}:8009
+      - ${NGINX_PORT_2}:8010
+      - ${NGINX_PORT_3}:8014
+      - ${NGINX_PORT_4}:8015
+      - ${NGINX_PORT_5}:8080
     volumes:
       - ./nginx-php-fpm-82/tpl.d:/etc/nginx/tpl.d
       - ./nginx-php-fpm-82/general.conf:/etc/nginx/general.conf
@@ -21,44 +21,44 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
 
     depends_on:
-      - devops-mysql-81
-      - devops-redis-72
+      - mysql-81
+      - redis-72
     networks:
-      - devops-backend
+      - backend
 
-  devops-mysql-81:
-    container_name: devops-mysql-81
+  mysql-81:
+    container_name: ${MYSQL_81_CONTAINER_NAME}
     build:
       context: .
       dockerfile: ./mysql-81/Dockerfile
     ports:
-      - 2306:3306
+      - ${MYSQL_HOST_PORT}:3306
     volumes:
       - type: volume
-        source: devops-mysql-store-81
+        source: mysql-store-81
         target: /var/lib/mysql
         volume:
           nocopy: true
     environment:
-      MYSQL_ROOT_PASSWORD: Devops-Arisvn1369!
-      MYSQL_DATABASE: gencode_db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - devops-backend
+      - backend
 
-  devops-redis-72:
-    container_name: devops-redis-72
+  redis-72:
+    container_name: ${REDIS_72_CONTAINER_NAME}
     build:
       context: .
       dockerfile: ./redis-72/Dockerfile
     ports:
-      - 2379:6379
+      - ${REDIS_HOST_PORT}:6379
     volumes:
-      - devops-redis-store-72:/data
+      - redis-store-72:/data
       - ./redis-72/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     healthcheck:
@@ -67,8 +67,8 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - devops-backend
+      - backend
       
 networks:
-  devops-backend:
+  backend:
     driver: bridge
