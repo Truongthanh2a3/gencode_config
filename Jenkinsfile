@@ -16,7 +16,7 @@ pipeline {
         stage('Trigger Check') {
             when {
                 expression {
-                    return params.ref == 'refs/heads/devops'
+                    return params.ref == 'refs/heads/develop'
                 }
             }
             steps {
